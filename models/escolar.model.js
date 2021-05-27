@@ -17,12 +17,17 @@ const schema = new mongoose.Schema(
         curp: {
             type: String,
             required: true,
-            $regex: /^[A-Z]{1}[AEIOU]{1}[A-Z]{2}[0-9]{2}(0[1-9]|1[0-2])(0[1-9]|1[0-9]|2[0-9]|3[0-1])HM]{1}(AS|BC|BS|CC|CS|CH|CL|CM|DF|DG|GT|GR|HG|JC|MC|MN|MS|NT|NL|OC|PL|QT|QR|SP|SL|SR|TC|TS|TL|VZ|YN|ZS|NE)[B-DF-HJ-NP-TV-Z]{3}[0-9A-Z]{1}[0-9]{1}$/
+            validate: {
+                validator: function(v) {
+                  return /^([A-Z][AEIOUX][A-Z]{2}\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])[HM](?:AS|B[CS]|C[CLMSH]|D[FG]|G[TR]|HG|JC|M[CNS]|N[ETL]|OC|PL|Q[TR]|S[PLR]|T[CSL]|VZ|YN|ZS)[B-DF-HJ-NP-TV-Z]{3}[A-Z\d])(\d)$/.test(v);
+                },
+                message: `La CURP no es valida!`
+            }
         },
         create_date: {
             type: Date,
-            required: true,
-            default: Date.now
+            default: Date.now,
+            required: true
         },
         controlnumber: {
             type: String,
@@ -31,12 +36,23 @@ const schema = new mongoose.Schema(
         },
         grade: {
             type: Number,
-            required: true
+            required: true,
+            validate(value) {
+                if (value >= 0 && value <= 100) {     
+                } else {
+                    throw new Error("La calificacion debe ser Mayor o igual que 0 y menor o igual que 100");
+                }
+            }
         },
         career: {
             type: String,
             required: true,
-            $regex: /(ISC|IM|IGE|IC){1}/
+            validate: {
+                validator: function(v) {
+                  return /(ISC|IM|IGE|IC){1}/.test(v);
+                },
+                message: `No es valida la carrera ingresada elegir (ISC, IM, IGE, IC)`
+            }
         }
     }
 );
