@@ -44,7 +44,7 @@ module.exports = () => {
             );
     });
 
-        /** Consulta general control escolar*/
+    /** Consulta general control escolar*/
     router.get('/', (req, res) => {
         Escolar.find({})
             .then(
@@ -167,5 +167,160 @@ module.exports = () => {
             )
     });
     
+    /** Estadística de estudiantes hombres y mujeres por carrera*/
+    router.post("/Genero/", (req, res) => {
+        Escolar.find({})
+          .then((data) => {
+            iscH = 0;
+            iscM = 0;
+            //ISC H o M
+            imH = 0;
+            imM = 0;
+            //IM H o M
+            igeH = 0;
+            igeM = 0;
+            //IGE H o M
+            icH = 0;
+            icM = 0;
+            //IC H o M
+    
+            data.forEach((escolar, i) => {
+              if (data[i].career === "ISC") {
+                data[i].curp.charAt(10) == "H" ? iscH++ : iscM++;
+              }
+              if (data[i].career === "IM") {
+                data[i].curp.charAt(10) == "H" ? imH++ : imM++;
+              }
+              if (data[i].career === "IGE") {
+                data[i].curp.charAt(10) == "H" ? igeH++ : igeM++;
+              }
+              if (data[i].career === "IC") {
+                data[i].curp.charAt(10) == "H" ? icH++ : icM++;
+              }
+            });
+    
+            res.json({
+              code: status.OK,
+              msg: "Consulta correcta",
+              data: [
+                ["ISC", ["Hombres: " + iscH, "Mujeres: " + iscM]],
+                ["IM", ["Hombres: " + imH, "Mujeres: " + imM]],
+                ["IGE", ["Hombres: " + igeH, "Mujeres: " + igeM]],
+                ["IC", ["Hombres: " + icH, "Mujeres: " + icM]],
+              ],
+            });
+          })
+          .catch((err) => {
+            res.status(status.BAD_REQUEST).json({
+              code: status.BAD_REQUEST,
+              msg: "Error en la petición",
+              err: err.name,
+              detail: err.message,
+            });
+          });
+      });
+    
+    /**Estadística de estudiantes foráneos por carrera */  
+    router.post("/Foraneos/", (req, res) => {
+        Escolar.find({})
+          .then((data) => {
+            iscF = 0;
+            imF = 0;
+            igeF = 0;
+            icF = 0;
+            //Foraneos
+    
+            data.forEach((escolar, i) => {
+              if (data[i].career === "ISC") {
+                data[i].curp.substr(11,2) != "NT" ? iscF++ : 0;
+              }
+              if (data[i].career === "IM") {
+                data[i].curp.substr(11,2) != "NT" ? imF++ : 0;
+              }
+              if (data[i].career === "IGE") {
+                data[i].curp.substr(11,2) != "NT" ? igeF++ : 0;
+              }
+              if (data[i].career === "IC") {
+                data[i].curp.substr(11,2) != "NT" ? icF++ : 0;
+              }
+            });
+    
+            res.json({
+              code: status.OK,
+              msg: "Consulta correcta",
+              data: [
+                ["ISC", ["Foraneos: " + iscF]],
+                ["IM", ["Foraneos: " + icF]],
+                ["IGE", ["Foraneos: " + igeF]],
+                ["IC", ["Foraneos: " + imF]],
+              ],
+            });
+          })
+          .catch((err) => {
+            res.status(status.BAD_REQUEST).json({
+              code: status.BAD_REQUEST,
+              msg: "Error en la petición",
+              err: err.name,
+              detail: err.message,
+            });
+          });
+      });
+
+    /**Estadística de estudiantes aprobados y no aprobados por carrera*/
+    router.post("/Aprobados_SI_NO/", (req, res) => {
+        Escolar.find({})
+          .then((data) => {
+            iscA = 0;
+            iscR = 0;
+            //ISC CALIFICACIONES
+            imA = 0;
+            imR = 0;
+            //IM CALIFICACIONES
+            igeA = 0;
+            igeR = 0;
+            //IGE CALIFICACIONES
+            icA = 0;
+            icR = 0;
+            //IC CALIFICACIONES
+    
+            data.forEach((escolar, i) => {
+              if (data[i].career === "ISC") {
+                data[i].grade >= 70 ? iscA++ : iscR++;
+              }
+              if (data[i].career === "IM") {
+                data[i].grade >= 70 ? imA++ : imR++;
+              }
+              if (data[i].career === "IGE") {
+                data[i].grade >= 70 ? igeA++ : igeR++;
+              }
+              if (data[i].career === "IC") {
+                data[i].grade >= 70 ? icA++ : icR++;
+              }
+            });
+    
+            res.json({
+              code: status.OK,
+              msg: "Consulta correcta",
+              data: [
+                ["ISC", ["Aprobados: " + iscA, "Reprobados: " + iscR]],
+                ["IM", ["Aprobados: " + iscA, "Reprobados: " + imR]],
+                ["IGE", ["Aprobados: " + iscA, "Reprobados: " + igeR]],
+                ["IC", ["Aprobados: " + iscA, "Reprobados: " + icR]],
+              ],
+            });
+          })
+          .catch((err) => {
+            res.status(status.BAD_REQUEST).json({
+              code: status.BAD_REQUEST,
+              msg: "Error en la petición",
+              err: err.name,
+              detail: err.message,
+            });
+          });
+      });
+    
+    /**Estadística de estudiantes mayores y menores de edad por carrera */
+    
+
     return router;
 }
