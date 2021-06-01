@@ -1,130 +1,105 @@
-const router = require('express').Router();
-
-const mongoose = require('mongoose');
-var status = require('http-status');
+const router = require("express").Router();
+const mongoose = require("mongoose");
+var status = require("http-status");
 
 mongoose.Promise = global.Promise;
-mongoose.connect('mongodb://localhost:27017/controlescolar', {
+mongoose.connect('mongodb://localhost:27017/scholarCtrl', 
+{
     useNewUrlParser: true,
     useUnifiedTopology: true
-});
+})
 
-const Escolar = require('../models/escolar.model');
+const Scholar = require('../models/escolar.model.js');
 
 module.exports = () => {
-    /** Insertar alumno */
-    router.post('/', (req, res) => {
-        escolar = req.body;
+    // INSERT STUDENT
+    router.post('/student', (req, res) => {
+        Scholar = req.body;
 
-        Escolar.create(escolar)
-            .then(
-                (data) => {
-                        console.log(data);
-                        res.json(
-                            {
-                                code: status.OK,
-                                msg: 'Se insertó correctamente',
-                                data: data
-                            }
-                        )                   
-                }
-            )
-            .catch(
-                (err) => {
-                    res.status(status.BAD_REQUEST)
-                        .json(
-                            {
-                                code: status.BAD_REQUEST,
-                                msg: 'Ocurrió un error',
-                                err: err.name,
-                                default: err.message
-                            }
-                        )
-                }
-            );
-    });
-
-    /** Consulta general control escolar*/
-    router.get('/', (req, res) => {
-        Escolar.find({})
-            .then(
-                (escolares) => {
+        Scholar.create(scholar)
+            .then((data) => {
+                      console.log(data)
+                      res.json({
+                        code: status.OK,
+                        msg: "Se insertó correctamente",
+                        data: data
+                            })                   
+                })
+            .catch((err) => {
+                    res.status(status.BAD_REQUEST).json({
+                      code: status.BAD_REQUEST,
+                      msg: 'Ocurrió un error',
+                      err: err.name,
+                      default: err.message
+                            } )
+                })
+    })
+    /* Consulta gral de estudiantes */
+    router.get("/", (req, res) => {
+        Scholar.find({}).then((scholars) => {
                     res.json({
                         code: status.OK,
-                        msg: 'Consulta correcta',
-                        data: escolares
+                        msg: "Consulta correcta",
+                        data: scholars
                     })
-                }
-            )
-            .catch(
-                (err) => {
-                    res.status(status.BAD_REQUEST)
-                        .json({
+                })
+            .catch((err) => {
+                    res.status(status.BAD_REQUEST).json({
                             code: status.BAD_REQUEST,
-                            msg: 'Error en la petición',
+                            msg: "Error de peticion",
                             err: err.name,
                             detail: err.message
                         })
-                }
-            )
-    });
-
-    /** Eliminar alumno*/
+                })
+    })
+    /* Eliminar estudiante por número de control */
     router.delete('/:id', (req, res) => {
         id = req.params.id;
-        Escolar.findByIdAndRemove(id)
-            .then(
-                (data) => {
+        Scholar.findByIdAndRemove(id).then((data) => {
                     if(data)
                         res.json({
                             code: status.OK,
-                            msg: 'Se eliminó correctamente',
+                            msg: "Eliminado correctamente",
                             data: data
                         })
                     else 
                         res.status(status.NOT_FOUND)
                         .json({
                             code: status.NOT_FOUND,
-                            msg: 'No se encontró el elemento'
+                            msg: "Estudiante no encontrado"
                         })
                 }
             )
-            .catch(
-                (err) => {
+            .catch((err) => {
                     res.status(status.BAD_REQUEST)
                         .json({
                             code: status.BAD_REQUEST,
-                            msg: 'Error en la petición',
+                            msg: "Error en la petición",
                             err: err.name,
                             detail: err.message
                         })
-                }
-            )
-    });
+                })
+    })
 
-    /** Consulta alumno por _id */
+    /* Consulta un estudiante por número de control */
     router.get('/:id', (req, res) => {
 
         const id = req.params.id;
 
-        Escolar.findOne({ _id: id })
-            .then(
-                (escolar) => {
-                    if (escolar)
+        Scholar.findOne({ _id: id })
+            .then((scholar) => {
+                    if (scholar)
                         res.json({
                             code: status.OK,
-                            msg: 'Consulta correcta',
-                            data: escolar
-                        });
+                            msg: "Consulta correcta",
+                            data: scholar
+                        })
                     else
-                        res.status(status.NOT_FOUND)
-                            .json({
+                        res.status(status.NOT_FOUND).json({
                                 code: status.NOT_FOUND,
-                                msg: 'No se encontró el elemento'
-                            });
-
-                }
-            )
+                                msg: "Elemento no encontrado"
+                            })
+                } )
             .catch(
                 (err) => {
                     res.status(status.BAD_REQUEST)
@@ -138,38 +113,35 @@ module.exports = () => {
             )
     });
 
-    /** Actualización */
+    /*Actualizar la calificación de un estudiante*/
     router.put('/:id', (req, res) => {
         id = req.params.id;
-        escolar = req.body;
-        Escolar.findByIdAndUpdate(id, escolar, { new: true })
+        scholar = req.body;
+        Scholar.findByIdAndUpdate(id, scholar, { new: true })
             .then(
                 (data) => {
                     console.log(data);
                     res.json({
                         code: status.OK,
-                        msg: 'Se actualizó correctamente',
+                        msg: "Se actualizó correctamente",
                         data: data
                     });
                 }
             )
-            .catch(
-                (err) => {
+            .catch((err) => {
                     console.log(err);
                     res.status(status.BAD_REQUEST);
                     res.json({
                         code: status.BAD_REQUEST,
-                        msg: 'Error en la petición',
+                        msg: "Error en la petición",
                         err: err.name,
                         detail: err.message
                     })
-                }
-            )
-    });
+                })})
     
-    /** Estadística de estudiantes hombres y mujeres por carrera*/
-    router.post("/Genero/", (req, res) => {
-        Escolar.find({})
+    /* Estadística de estudiantes hombres y mujeres por carrera */
+    router.post("/gender/", (req, res) => {
+        Scholar.find({})
           .then((data) => {
             iscH = 0;
             iscM = 0;
@@ -184,21 +156,21 @@ module.exports = () => {
             icM = 0;
             //IC H o M
     
-            data.forEach((escolar, i) => {
+            //for male/females careers
+            data.forEach((scholar, i) => {
               if (data[i].career === "ISC") {
-                data[i].curp.charAt(10) == "H" ? iscH++ : iscM++;
+                data[i].curp.charAt(10) == "H" ? iscH++ : iscM++
               }
               if (data[i].career === "IM") {
-                data[i].curp.charAt(10) == "H" ? imH++ : imM++;
+                data[i].curp.charAt(10) == "H" ? imH++ : imM++
               }
               if (data[i].career === "IGE") {
-                data[i].curp.charAt(10) == "H" ? igeH++ : igeM++;
+                data[i].curp.charAt(10) == "H" ? igeH++ : igeM++
               }
               if (data[i].career === "IC") {
-                data[i].curp.charAt(10) == "H" ? icH++ : icM++;
+                data[i].curp.charAt(10) == "H" ? icH++ : icM++
               }
-            });
-    
+            })    
             res.json({
               code: status.OK,
               msg: "Consulta correcta",
@@ -208,42 +180,42 @@ module.exports = () => {
                 ["IGE", ["Hombres: " + igeH, "Mujeres: " + igeM]],
                 ["IC", ["Hombres: " + icH, "Mujeres: " + icM]],
               ],
-            });
-          })
+            })})
           .catch((err) => {
-            res.status(status.BAD_REQUEST).json({
+            res.status(status.BAD_REQUEST)
+            .json({
               code: status.BAD_REQUEST,
               msg: "Error en la petición",
               err: err.name,
               detail: err.message,
-            });
-          });
-      });
+            })
+          })
+      })
     
     /**Estadística de estudiantes foráneos por carrera */  
-    router.post("/Foraneos/", (req, res) => {
-        Escolar.find({})
+    router.post("/foreign/", (req, res) => {
+        Scholar.find({})
           .then((data) => {
-            iscF = 0;
-            imF = 0;
-            igeF = 0;
-            icF = 0;
-            //Foraneos
-    
-            data.forEach((escolar, i) => {
+            iscF = 0
+            imF = 0
+            igeF = 0
+            icF = 0
+
+            //for foreigns
+            data.forEach((scholar, i) => {
               if (data[i].career === "ISC") {
-                data[i].curp.substr(11,2) != "NT" ? iscF++ : 0;
+                //a traves del curp sabremos si es o no foraneo
+                data[i].curp.substr(11,2) != "NT" ? iscF++ : 0
               }
               if (data[i].career === "IM") {
-                data[i].curp.substr(11,2) != "NT" ? imF++ : 0;
+                data[i].curp.substr(11,2) != "NT" ? imF++ : 0
               }
               if (data[i].career === "IGE") {
-                data[i].curp.substr(11,2) != "NT" ? igeF++ : 0;
+                data[i].curp.substr(11,2) != "NT" ? igeF++ : 0
               }
               if (data[i].career === "IC") {
-                data[i].curp.substr(11,2) != "NT" ? icF++ : 0;
-              }
-            });
+                data[i].curp.substr(11,2) != "NT" ? icF++ : 0
+              }})
     
             res.json({
               code: status.OK,
@@ -254,47 +226,43 @@ module.exports = () => {
                 ["IGE", ["Foraneos: " + igeF]],
                 ["IC", ["Foraneos: " + imF]],
               ],
-            });
-          })
+            })})
           .catch((err) => {
             res.status(status.BAD_REQUEST).json({
               code: status.BAD_REQUEST,
               msg: "Error en la petición",
               err: err.name,
               detail: err.message,
-            });
-          });
-      });
+            })
+          }) })
 
     /**Estadística de estudiantes aprobados y no aprobados por carrera*/
-    router.post("/Aprobados_SI_NO/", (req, res) => {
-        Escolar.find({})
+    router.post("/aprovedifnot/", (req, res) => {
+        Scholar.find({})
           .then((data) => {
-            iscA = 0;
-            iscR = 0;
-            //ISC CALIFICACIONES
-            imA = 0;
-            imR = 0;
-            //IM CALIFICACIONES
-            igeA = 0;
-            igeR = 0;
-            //IGE CALIFICACIONES
-            icA = 0;
-            icR = 0;
-            //IC CALIFICACIONES
+            //A=aproveds;R=reprobados
+            iscA = 0
+            iscR = 0
+            imA = 0
+            imR = 0
+            igeA = 0
+            igeR = 0
+            icA = 0
+            icR = 0
     
+            //for resultados
             data.forEach((escolar, i) => {
               if (data[i].career === "ISC") {
-                data[i].grade >= 70 ? iscA++ : iscR++;
+                data[i].grade >= 70 ? iscA++ : iscR++
               }
               if (data[i].career === "IM") {
-                data[i].grade >= 70 ? imA++ : imR++;
+                data[i].grade >= 70 ? imA++ : imR++
               }
               if (data[i].career === "IGE") {
-                data[i].grade >= 70 ? igeA++ : igeR++;
+                data[i].grade >= 70 ? igeA++ : igeR++
               }
               if (data[i].career === "IC") {
-                data[i].grade >= 70 ? icA++ : icR++;
+                data[i].grade >= 70 ? icA++ : icR++
               }
             });
     
@@ -307,20 +275,63 @@ module.exports = () => {
                 ["IGE", ["Aprobados: " + iscA, "Reprobados: " + igeR]],
                 ["IC", ["Aprobados: " + iscA, "Reprobados: " + icR]],
               ],
-            });
-          })
+            })  })
           .catch((err) => {
             res.status(status.BAD_REQUEST).json({
               code: status.BAD_REQUEST,
               msg: "Error en la petición",
               err: err.name,
               detail: err.message,
-            });
-          });
-      });
+            })
+          })
+      })
     
     /**Estadística de estudiantes mayores y menores de edad por carrera */
     
+    /* 
+    router.post("/mayormenoredad/", (req, res) => {
+      Scholar.find({})
+        .then((data) => {
+  
+          stMen = 0
+          stMay = 0
+          //for resultados mayor/menor
+          data.forEach((scholar, i) => {
+            if (data[i].curp === "ISC") {
+              data[i].curp.substr(6,2) >= "01" ? stMay++ : stMen++
+            }
+            if (data[i].career === "IM") {
+              data[i].curp.substr(6,2) >= "01" ? stMay++ : stMen++
+            }
+            if (data[i].career === "IGE") {
+              data[i].curp.substr(6,2) >= "01" ? stMay++ : stMen++
+            }
+            if (data[i].career === "IC") {
+              data[i].curp.substr(6,2) >= "01" ? stMay++ : stMen++
+            }
+          });
+  
+          res.json({
+            code: status.OK,
+            msg: "Consulta correcta",
+            data: [
+              ["ISC", ["Mayores: " + stMay, "Menores: " + stMen]],
+              ["IM", ["Mayores: " + stMay, "Menores: " + stMen]],
+              ["IGE", ["Mayores: " + stMay, "Menores: " + stMen]],
+              ["IC", ["Mayores: " + stMay, "Menores: " + stMen]],
+            ],
+          })  })
+        .catch((err) => {
+          res.status(status.BAD_REQUEST).json({
+            code: status.BAD_REQUEST,
+            msg: "Error en la petición",
+            err: err.name,
+            detail: err.message,
+          })
+        })
+    })
+
+    */
 
     return router;
 }
