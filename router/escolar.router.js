@@ -14,7 +14,7 @@ const Scholar = require('../models/escolar.model.js');
 module.exports = () => {
     // INSERT STUDENT
     router.post('/student', (req, res) => {
-        Scholar = req.body;
+        scholar = req.body;
 
         Scholar.create(scholar)
             .then((data) => {
